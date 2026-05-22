@@ -6,6 +6,7 @@
 <title>YoSinTV API Admin</title>
 
 <style>
+
 *{
   box-sizing:border-box;
 }
@@ -28,10 +29,12 @@ body{
   border-radius:18px;
   padding:20px;
   margin-bottom:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.2);
 }
 
 h1{
   margin-top:0;
+  margin-bottom:20px;
 }
 
 .row{
@@ -75,6 +78,11 @@ textarea{
   font-family:monospace;
   font-size:14px;
   resize:vertical;
+  line-height:1.5;
+
+  white-space:pre-wrap;
+  overflow-wrap:break-word;
+  word-break:break-word;
 }
 
 .danger{
@@ -96,6 +104,20 @@ textarea{
   display:none;
   transition:0.3s;
 }
+
+@media(max-width:768px){
+
+  .row{
+    flex-direction:column;
+  }
+
+  button,
+  select{
+    width:100%;
+  }
+
+}
+
 </style>
 </head>
 
@@ -105,10 +127,13 @@ textarea{
 
   <h1>YoSinTV API Admin</h1>
 
+  <!-- TOP ACTIONS -->
   <div class="card">
+
     <div class="row">
 
       <select id="file">
+
         <option value="api/match-football.json">
           Football API
         </option>
@@ -120,6 +145,7 @@ textarea{
         <option value="api/articles.json">
           Articles API
         </option>
+
       </select>
 
       <button onclick="loadFile()">
@@ -139,19 +165,23 @@ textarea{
       </button>
 
     </div>
+
   </div>
 
-  <!-- STATUS BOX -->
+  <!-- STATUS -->
   <div id="statusBox" class="card">
     <p id="status">Ready</p>
   </div>
 
   <!-- EDITOR -->
   <div class="card">
+
     <textarea
       id="editor"
+      spellcheck="false"
       placeholder="Click Load JSON..."
     ></textarea>
+
   </div>
 
 </div>
@@ -230,7 +260,7 @@ async function loadFile(){
       );
 
     setStatus(
-      "✅ Loaded: " + file,
+      "✅ Loaded successfully: " + file,
       "success"
     );
 
@@ -332,7 +362,7 @@ function formatJson(){
       JSON.stringify(json,null,2);
 
     setStatus(
-      "✅ JSON formatted",
+      "✅ JSON formatted successfully",
       "success"
     );
 
