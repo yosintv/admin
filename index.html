@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,7 +20,7 @@ body{
 }
 
 .wrap{
-  max-width:1100px;
+  max-width:1200px;
   margin:auto;
   padding:20px;
 }
@@ -29,12 +30,13 @@ body{
   border-radius:18px;
   padding:20px;
   margin-bottom:20px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.2);
+  box-shadow:0 10px 30px rgba(0,0,0,0.25);
 }
 
 h1{
   margin-top:0;
   margin-bottom:20px;
+  font-size:32px;
 }
 
 .row{
@@ -44,11 +46,10 @@ h1{
 }
 
 button,
-select,
-textarea{
+select{
   border:0;
   border-radius:10px;
-  padding:12px;
+  padding:12px 16px;
   font-size:15px;
 }
 
@@ -72,17 +73,31 @@ select{
 
 textarea{
   width:100%;
-  height:65vh;
+  height:70vh;
+
   background:#020617;
   color:#d1fae5;
+
   font-family:monospace;
   font-size:14px;
-  resize:vertical;
-  line-height:1.5;
+  line-height:1.6;
 
+  border:0;
+  border-radius:14px;
+  padding:18px;
+
+  resize:vertical;
+
+  /* SOFT WRAP */
   white-space:pre-wrap;
-  overflow-wrap:break-word;
+  overflow-wrap:anywhere;
   word-break:break-word;
+
+  /* REMOVE HORIZONTAL SCROLL */
+  overflow-x:hidden;
+
+  /* KEEP VERTICAL SCROLL */
+  overflow-y:auto;
 }
 
 .danger{
@@ -98,11 +113,19 @@ textarea{
 #status{
   margin:0;
   font-weight:600;
+  font-size:15px;
 }
 
 #statusBox{
   display:none;
   transition:0.3s;
+}
+
+.footer{
+  text-align:center;
+  opacity:0.7;
+  margin-top:20px;
+  font-size:13px;
 }
 
 @media(max-width:768px){
@@ -114,6 +137,14 @@ textarea{
   button,
   select{
     width:100%;
+  }
+
+  h1{
+    font-size:26px;
+  }
+
+  textarea{
+    height:65vh;
   }
 
 }
@@ -135,15 +166,15 @@ textarea{
       <select id="file">
 
         <option value="api/match-football.json">
-          Football API
+          ⚽ Football API
         </option>
 
         <option value="api/match-cricket.json">
-          Cricket API
+          🏏 Cricket API
         </option>
 
         <option value="api/articles.json">
-          Articles API
+          📰 Articles API
         </option>
 
       </select>
@@ -182,6 +213,10 @@ textarea{
       placeholder="Click Load JSON..."
     ></textarea>
 
+  </div>
+
+  <div class="footer">
+    YoSinTV API Manager
   </div>
 
 </div>
@@ -392,3 +427,4 @@ loadFile();
 
 </body>
 </html>
+```
