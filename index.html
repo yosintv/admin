@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>YoSinTV API Admin</title>
+<style>
+body{margin:0;font-family:Arial;background:#0f172a;color:#fff}
+.wrap{max-width:1100px;margin:auto;padding:20px}
+.card{background:#1e293b;border-radius:18px;padding:20px;margin-bottom:20px}
+button,select,input,textarea{border:0;border-radius:10px;padding:12px;font-size:15px}
+button{background:#22c55e;color:#04130a;font-weight:700;cursor:pointer}
+textarea{width:100%;height:500px;background:#020617;color:#d1fae5;font-family:monospace}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+select,input{background:#334155;color:white}
+.danger{background:#ef4444;color:white}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>YoSinTV API Admin</h1>
+
+  <div class="card">
+    <div class="row">
+      <input id="password" type="password" placeholder="Admin Password">
+      <select id="file">
+        <option value="api/match-football.json">Football API</option>
+        <option value="api/match-cricket.json">Cricket API</option>
+        <option value="api/articles.json">Articles API</option>
+      </select>
+      <button onclick="loadFile()">Load</button>
+      <button onclick="saveFile()">Save & Push GitHub</button>
+      <button class="danger" onclick="formatJson()">Format JSON</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <textarea id="editor" placeholder="Load JSON here..."></textarea>
+  </div>
+
+  <div class="card">
+    <p id="status">Ready</p>
+  </div>
+</div>
+
+<script>
+const WORKER_URL = "https://YOUR-WORKER-NAME.YOUR-SUBDOMAIN.workers.dev";
+
+function setStatus(msg){
+  document.getElementById("status").innerText = msg;
+}
+
+async function loadFile(){
+  const file = document.getElementById("file").value;
+  setStatus("Loading...");
+  try{
+    const res = await fetch(`${WORKER_URL}/get?path=${encodeURIComponent(file)}`);
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || "Load failed");
+    document.getElementById("editor").value = JSON.stringify(data.content, null, 2);
+    setStatus("✅ Loaded: " + file);
+  }catch(e){
+    setStatus("❌ " + e.message);
+  }
+}
+
+function formatJson(){
+  try{
+    const json = JSON.parse(document.getElementById("editor").value);
+    document.getElementById("editor").value = JSON.stringify(json, null, 2);
+    setStatus("✅ JSON formatted");
+  }catch(e){
+    setStatus("❌ Invalid JSON");
+  }
+}
+
+async function saveFile(){
+  const password = document.getElementById("password").value;
+  const file = document.getElementById("file").value;
+  let content;
+
+  try{
+    content = JSON.parse(document.getElementById("editor").value);
+  }catch(e){
+    setStatus("❌ Invalid JSON. Fix before saving.");
+    return;
+  }
+
+  setStatus("Saving to GitHub...");
+
+  try{
+    const res = await fetch(`${WORKER_URL}/save`, {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({
+        password,
+        path: file,
+        content
+      })
+    });
+
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || "Save failed");
+
+    setStatus("✅ Saved & pushed to GitHub successfully");
+  }catch(e){
+    setStatus("❌ " + e.message);
+  }
+}
+</script>
+</body>
+</html>
