@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -360,9 +361,9 @@ select{
     <div class="toolbar">
 
       <select id="file">
-        <option value="api/match-football.json">Football API</option>
-        <option value="api/match-cricket.json">Cricket API</option>
-        <option value="api/articles.json">Articles API</option>
+        <option value="api/match-football.json" data-label="Football API">Football API</option>
+        <option value="api/match-cricket.json" data-label="Cricket API">Cricket API</option>
+        <option value="api/articles.json" data-label="Articles API">Articles API</option>
       </select>
 
       <input
@@ -377,7 +378,7 @@ select{
       <span class="editor-filename" id="editorTitle">
         Editing: api/match-football.json
       </span>
-      <span class="editor-actions">Soft Wrap ON · JSON Mode · Auto Load</span>
+      <span class="editor-actions" id="editorActions">Soft Wrap ON · JSON Mode · Auto Load</span>
     </div>
 
     <div class="editor-wrap">
@@ -406,6 +407,62 @@ select{
 
 <script>
 const API_URL = "/api/github";
+
+function getItemsFromContent(content){
+
+  if(Array.isArray(content))
+    return content;
+
+  if(!content || typeof content !== "object")
+    return [];
+
+  return content.matches ||
+         content.data ||
+         content.events ||
+         content.articles ||
+         [];
+}
+
+function hasYosintvDetailsUrl(item){
+
+  if(!item || typeof item !== "object")
+    return false;
+
+  if(!item.details_url)
+    return false;
+
+  try{
+    const url = new URL(item.details_url);
+    return url.searchParams.has("yosintv");
+  }catch(e){
+    return /[?&]yosintv=/.test(String(item.details_url));
+  }
+}
+
+function getMatchCount(content){
+
+  const items = getItemsFromContent(content);
+
+  return items.filter(hasYosintvDetailsUrl).length;
+}
+
+function getCleanLabel(file){
+
+  if(file.includes("football"))
+    return "Football API";
+
+  if(file.includes("cricket"))
+    return "Cricket API";
+
+  if(file.includes("articles"))
+    return "Articles API";
+
+  return file;
+}
+
+function formatMatchText(count){
+  return count === 1 ? "1 match" : count + " matches";
+}
 
 function setSaveButtonState(state){
 
@@ -459,6 +516,49 @@ function updateEditorTitle(){
     "Editing: " + file;
 }
 
+function updateEditorActionsFromContent(content){
+
+  const count = getMatchCount(content);
+
+  document.getElementById("editorActions").innerText =
+    "Detected " + formatMatchText(count) + " · JSON Mode";
+}
+
+async function updateApiCounts(){
+
+  const fileSelect = document.getElementById("file");
+
+  for(const option of fileSelect.options){
+
+    const file = option.value;
+    const cleanLabel = option.dataset.label || getCleanLabel(file);
+
+    option.textContent = cleanLabel + " - checking...";
+
+    try{
+
+      const res = await fetch(
+        `${API_URL}?path=${encodeURIComponent(file)}`
+      );
+
+      const data = await res.json();
+
+      if(!res.ok)
+        throw new Error("count failed");
+
+      const count = getMatchCount(data.content);
+
+      option.textContent =
+        cleanLabel + " - " + formatMatchText(count);
+
+    }catch(e){
+
+      option.textContent =
+        cleanLabel + " - 0 matches";
+    }
+  }
+}
+
 document.getElementById("file").addEventListener("change",function(){
   updateEditorTitle();
   loadFile();
@@ -490,6 +590,9 @@ async function loadFile(){
 
     document.getElementById("editor").value =
       JSON.stringify(data.content,null,2);
+
+    updateEditorActionsFromContent(data.content);
+    updateApiCounts();
 
     setStatus("Loaded: " + file,"success");
 
@@ -545,6 +648,9 @@ async function saveFile(){
       );
     }
 
+    updateEditorActionsFromContent(content);
+    updateApiCounts();
+
     setSaveButtonState("saved");
     setStatus("Saved: " + file,"success");
 
@@ -565,6 +671,8 @@ function formatJson(){
 
     editor.value = JSON.stringify(json,null,2);
 
+    updateEditorActionsFromContent(json);
+
     setStatus("Formatted","success");
 
   }catch(e){
@@ -577,12 +685,16 @@ function formatJson(){
 function clearEditor(){
 
   document.getElementById("editor").value = "";
+  document.getElementById("editorActions").innerText =
+    "Soft Wrap ON · JSON Mode · Auto Load";
   setStatus("Editor cleared","info");
 
 }
 
+updateApiCounts();
 loadFile();
 </script>
 
 </body>
 </html>
+```
